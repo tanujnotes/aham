@@ -1,0 +1,15 @@
+<resources>
+    <string name="app_name">aham</string>
+
+    <string name="title_home">Home</string>
+    <string name="title_search">Search</string>
+    <string name="title_notifications">Notifications</string>
+    <string name="title_messages">Messages</string>
+
+    <string name="enter_your_twitter_username">Enter your twitter username</string>
+    <string name="next">Next</string>
+    <string name="instructions">1. After logging in, tap on tabs to refresh.
+        \n2. For Twitter settings, open messages and tap on your profile picture on the top.
+        \n3. The app looks better with Twitter dark mode.</string>
+    <string name="hashtag_aham">#aham</string>
+</resources>
