@@ -3,11 +3,9 @@ package app.olauncher.aham
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
+import android.provider.MediaStore
 import android.view.View
-import android.webkit.WebChromeClient
-import android.webkit.WebResourceRequest
-import android.webkit.WebView
-import android.webkit.WebViewClient
+import android.webkit.*
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
@@ -19,6 +17,9 @@ class MainActivity : AppCompatActivity() {
 
     private val twitterUrl = "https://mobile.twitter.com/"
     private val fragmentManager = supportFragmentManager
+    private var filePath: ValueCallback<Array<Uri>>? = null
+    private var results = mutableListOf<Uri>()
+    private val FILE_CHOOSER_RESULT_CODE = 10
 
     private lateinit var homeFragment: MainFragment
     private lateinit var searchFragment: MainFragment
@@ -183,7 +184,29 @@ class MainActivity : AppCompatActivity() {
                     else -> super.onReceivedTitle(webView, title)
                 }
             }
+
+            override fun onShowFileChooser(
+                webView: WebView?,
+                filePathCallback: ValueCallback<Array<Uri>>,
+                fileChooserParams: FileChooserParams?
+            ): Boolean {
+                filePath = filePathCallback
+                if (results.isNotEmpty()) {
+                    filePath!!.onReceiveValue(results.toTypedArray())
+                    filePath = null
+                    results.clear()
+                } else
+                    openFileChooserActivity()
+                return true
+            }
         }
+    }
+
+    private fun openFileChooserActivity() {
+        val photoLibraryIntent = Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI)
+        photoLibraryIntent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true)
+        photoLibraryIntent.type = "image/* video/*"
+        startActivityForResult(Intent.createChooser(photoLibraryIntent, "Please select"), FILE_CHOOSER_RESULT_CODE)
     }
 
     private fun getWebViewClient(): WebViewClient {
@@ -217,5 +240,32 @@ class MainActivity : AppCompatActivity() {
         val intent = Intent(Intent.ACTION_VIEW)
         intent.data = Uri.parse(url)
         startActivity(intent)
+    }
+
+    private fun getUriFromIntent(intent: Intent) {
+        val dataString = intent.dataString
+        val clipData = intent.clipData
+        if (clipData != null) {
+            if (clipData.itemCount > 4) {
+                Toast.makeText(this, "Please choose up to 4 photos or 1 video", Toast.LENGTH_LONG).show()
+                return
+            }
+            for (i in 0 until clipData.itemCount) {
+                val item = clipData.getItemAt(i)
+                results.add(item.uri)
+            }
+        }
+        if (dataString != null) results = mutableListOf(Uri.parse(dataString))
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, intent: Intent?) {
+        super.onActivityResult(requestCode, resultCode, intent)
+        if (requestCode != FILE_CHOOSER_RESULT_CODE || filePath == null) return
+        if (resultCode == RESULT_OK) {
+            intent?.let { getUriFromIntent(it) }
+        }
+        filePath!!.onReceiveValue(results.toTypedArray())
+        filePath = null
+        results.clear()
     }
 }
