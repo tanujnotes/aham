@@ -65,8 +65,22 @@ class MainActivity : AppCompatActivity() {
         fragmentManager.beginTransaction().hide(activeFragment).show(homeFragment).commit()
         activeFragment = homeFragment
 
+        handleIntent(intent)
+
         if (Prefs(this).username.isEmpty())
             userNameLayout.visibility = View.VISIBLE
+    }
+
+    override fun onNewIntent(intent: Intent) {
+        handleIntent(intent)
+        super.onNewIntent(intent)
+    }
+
+    private fun handleIntent(intent: Intent) {
+        if (Intent.ACTION_SEND == intent.action) {
+            Toast.makeText(this, "Tap gallery icon to share", Toast.LENGTH_SHORT).show()
+            getUriFromIntent(intent)
+        }
     }
 
     private fun saveUser() {
