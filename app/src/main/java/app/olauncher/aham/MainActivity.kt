@@ -17,12 +17,13 @@ import java.net.URL
 import java.util.*
 
 class MainActivity : AppCompatActivity() {
-
     private val twitterUrl = "https://mobile.twitter.com/"
     private val fragmentManager = supportFragmentManager
+    private val fileChooserRequestCode = 10
+
+    private var pressedTime: Long = 0
     private var filePath: ValueCallback<Array<Uri>>? = null
     private var results = mutableListOf<Uri>()
-    private val FILE_CHOOSER_RESULT_CODE = 10
 
     private lateinit var homeFragment: MainFragment
     private lateinit var searchFragment: MainFragment
@@ -30,29 +31,35 @@ class MainActivity : AppCompatActivity() {
     private lateinit var messagesFragment: MainFragment
     private lateinit var activeFragment: Fragment
 
+    private fun backAgainToExit() {
+        if (pressedTime + 2000 > System.currentTimeMillis()) super.onBackPressed()
+        else Toast.makeText(this, "Press back again to exit", Toast.LENGTH_SHORT).show()
+        pressedTime = System.currentTimeMillis();
+    }
+
     override fun onBackPressed() {
         when (activeFragment) {
             homeFragment -> {
                 if (homeFragment.theWebView.canGoBack())
                     homeFragment.theWebView.goBack()
-                else super.onBackPressed()
+                else backAgainToExit()
             }
             searchFragment -> {
                 if (searchFragment.theWebView.canGoBack())
                     searchFragment.theWebView.goBack()
-                else super.onBackPressed()
+                else backAgainToExit()
             }
             notificationsFragment -> {
                 if (notificationsFragment.theWebView.canGoBack())
                     notificationsFragment.theWebView.goBack()
-                else super.onBackPressed()
+                else backAgainToExit()
             }
             messagesFragment -> {
                 if (messagesFragment.theWebView.canGoBack())
                     messagesFragment.theWebView.goBack()
-                else super.onBackPressed()
+                else backAgainToExit()
             }
-            else -> super.onBackPressed()
+            else -> backAgainToExit()
         }
     }
 
@@ -246,7 +253,7 @@ class MainActivity : AppCompatActivity() {
         val photoLibraryIntent = Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI)
         photoLibraryIntent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true)
         photoLibraryIntent.type = "image/* video/*"
-        startActivityForResult(Intent.createChooser(photoLibraryIntent, "Please select"), FILE_CHOOSER_RESULT_CODE)
+        startActivityForResult(Intent.createChooser(photoLibraryIntent, "Please select"), fileChooserRequestCode)
     }
 
     private fun getWebViewClient(): WebViewClient {
@@ -300,7 +307,7 @@ class MainActivity : AppCompatActivity() {
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, intent: Intent?) {
         super.onActivityResult(requestCode, resultCode, intent)
-        if (requestCode != FILE_CHOOSER_RESULT_CODE || filePath == null) return
+        if (requestCode != fileChooserRequestCode || filePath == null) return
         if (resultCode == RESULT_OK) {
             intent?.let { getUriFromIntent(it) }
         }
