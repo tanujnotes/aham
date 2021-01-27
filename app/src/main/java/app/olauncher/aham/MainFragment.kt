@@ -32,6 +32,8 @@ class MainFragment(
 
     fun loadUrl() = theWebView.loadUrl(url)
 
+    fun loadUrl(customUrl: String) = theWebView.loadUrl(customUrl)
+
     @SuppressLint("SetJavaScriptEnabled")
     private fun setupWebView() {
         theWebView.settings.javaScriptEnabled = true

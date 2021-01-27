@@ -3,6 +3,8 @@ package app.olauncher.aham
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.provider.MediaStore
 import android.view.View
 import android.webkit.*
@@ -11,6 +13,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.fragment_main.*
+import java.net.URL
 import java.util.*
 
 class MainActivity : AppCompatActivity() {
@@ -80,6 +83,19 @@ class MainActivity : AppCompatActivity() {
         if (Intent.ACTION_SEND == intent.action) {
             Toast.makeText(this, "Tap gallery icon to share", Toast.LENGTH_SHORT).show()
             getUriFromIntent(intent)
+        } else {
+            val uri = intent.data ?: return
+            val url = URL(uri.scheme, uri.host, uri.path).toString()
+            if (isRestrictedUrl(url)) return
+
+            val handler = Handler(Looper.getMainLooper())
+            handler.postDelayed(object : Runnable {
+                override fun run() {
+                    if (this@MainActivity::homeFragment.isInitialized)
+                        homeFragment.loadUrl(url)
+                    else handler.postDelayed(this, 1000)
+                }
+            }, 0)
         }
     }
 
@@ -99,6 +115,16 @@ class MainActivity : AppCompatActivity() {
             usernameInput.visibility = View.GONE
             instructions.visibility = View.VISIBLE
         }
+    }
+
+    private fun isRestrictedUrl(url: String): Boolean {
+        if (url.isEmpty()
+            || url.endsWith("twitter.com")
+            || url.endsWith("twitter.com/")
+            || url.contains("twitter.com/home")
+            || url.contains("twitter.com/explore")
+        ) return true
+        return false
     }
 
     private fun initFragment() {
