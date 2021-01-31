@@ -6,6 +6,7 @@ import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.provider.MediaStore
+import android.util.Log
 import android.view.View
 import android.webkit.*
 import android.widget.Toast
@@ -212,8 +213,8 @@ class MainActivity : AppCompatActivity() {
         return object : WebChromeClient() {
             override fun onReceivedTitle(webView: WebView, title: String?) {
                 val url: String = webView.url.toString()
+                Log.d("URL:", url)
                 bottomNavView.visibility = View.VISIBLE
-                divider.visibility = View.VISIBLE
 
                 when {
                     url.contains("twitter.com/home") or url.contains("twitter.com/explore") -> {
@@ -225,11 +226,16 @@ class MainActivity : AppCompatActivity() {
                             super.onReceivedTitle(webView, title)
                         else if (split[1].contains("-") or (split[1] == "compose")) {
                             bottomNavView.visibility = View.GONE
-                            divider.visibility = View.GONE
                         }
                     }
-                    else -> super.onReceivedTitle(webView, title)
+                    url.contains("twitter.com/compose")
+                            or url.contains("twitter.com/i/display")
+                            or url.contains("ads.twitter.com")
+                            or url.contains("analytics.twitter.com") -> {
+                        bottomNavView.visibility = View.GONE
+                    }
                 }
+                super.onReceivedTitle(webView, title)
             }
 
             override fun onShowFileChooser(
