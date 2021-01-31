@@ -8,8 +8,8 @@
 
     <string name="enter_your_twitter_username">Enter your twitter username</string>
     <string name="next">Next</string>
-    <string name="instructions">1. After logging in, tap on tabs to refresh.
-        \n2. For Twitter settings, open messages and tap on your profile picture on the top.
-        \n3. The app looks better with Twitter dark mode.</string>
+    <string name="instructions">Things to remember:
+        \n\n1. After logging in, double tap on tabs to refresh. Or just restart the app.
+        \n\n2. For Twitter settings, open messages and tap on your picture on the top left.</string>
     <string name="hashtag_aham">#aham</string>
 </resources>
