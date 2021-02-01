@@ -10,17 +10,24 @@ import android.util.Log
 import android.view.View
 import android.webkit.*
 import android.widget.Toast
+import androidx.annotation.Nullable
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.FragmentManager
+import androidx.fragment.app.FragmentPagerAdapter
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.fragment_main.*
 import java.net.URL
 import java.util.*
 
+
 class MainActivity : AppCompatActivity() {
     private val twitterUrl = "https://mobile.twitter.com/"
-    private val fragmentManager = supportFragmentManager
     private val fileChooserRequestCode = 10
+    private val positionHome = 0
+    private val positionSearch = 1
+    private val positionNotification = 2
+    private val positionMessage = 3
 
     private var pressedTime: Long = 0
     private var filePath: ValueCallback<Array<Uri>>? = null
@@ -30,7 +37,6 @@ class MainActivity : AppCompatActivity() {
     private lateinit var searchFragment: MainFragment
     private lateinit var notificationsFragment: MainFragment
     private lateinit var messagesFragment: MainFragment
-    private lateinit var activeFragment: Fragment
 
     private fun backAgainToExit() {
         if (pressedTime + 2000 > System.currentTimeMillis()) super.onBackPressed()
@@ -39,23 +45,23 @@ class MainActivity : AppCompatActivity() {
     }
 
     override fun onBackPressed() {
-        when (activeFragment) {
-            homeFragment -> {
+        when (viewPager.currentItem) {
+            positionHome -> {
                 if (homeFragment.theWebView.canGoBack())
                     homeFragment.theWebView.goBack()
                 else backAgainToExit()
             }
-            searchFragment -> {
+            positionSearch -> {
                 if (searchFragment.theWebView.canGoBack())
                     searchFragment.theWebView.goBack()
                 else backAgainToExit()
             }
-            notificationsFragment -> {
+            positionNotification -> {
                 if (notificationsFragment.theWebView.canGoBack())
                     notificationsFragment.theWebView.goBack()
                 else backAgainToExit()
             }
-            messagesFragment -> {
+            positionMessage -> {
                 if (messagesFragment.theWebView.canGoBack())
                     messagesFragment.theWebView.goBack()
                 else backAgainToExit()
@@ -69,12 +75,14 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
 
         initFragment()
-        addFragments()
         setBottomNavListener()
         next.setOnClickListener { saveUser() }
 
-        fragmentManager.beginTransaction().hide(activeFragment).show(homeFragment).commit()
-        activeFragment = homeFragment
+        val adapter = ViewPagerAdapter(supportFragmentManager)
+        addFragments(adapter)
+        viewPager.offscreenPageLimit = 3
+        viewPager.adapter = adapter
+        viewPager.setOnTouchListener { _, _ -> true }
 
         handleIntent(intent)
 
@@ -96,6 +104,7 @@ class MainActivity : AppCompatActivity() {
             val url = URL(uri.scheme, uri.host, uri.path).toString()
             if (isRestrictedUrl(url)) return
 
+            viewPager.setCurrentItem(positionHome, false)
             val handler = Handler(Looper.getMainLooper())
             handler.postDelayed(object : Runnable {
                 override fun run() {
@@ -156,52 +165,36 @@ class MainActivity : AppCompatActivity() {
             getWebChromeClient(),
             getWebViewClient()
         )
-
-        activeFragment = homeFragment
     }
 
-    private fun addFragments() {
-        fragmentManager.beginTransaction().apply {
-            add(R.id.container, homeFragment, getString(R.string.title_home)).hide(homeFragment)
-            add(R.id.container, searchFragment, getString(R.string.title_search)).hide(searchFragment)
-            add(R.id.container, notificationsFragment, getString(R.string.title_notifications)).hide(notificationsFragment)
-            add(R.id.container, messagesFragment, getString(R.string.title_messages)).hide(messagesFragment)
-        }.commit()
+    private fun addFragments(adapter: ViewPagerAdapter) {
+        adapter.addFragment(homeFragment, "Home")
+        adapter.addFragment(searchFragment, "Search")
+        adapter.addFragment(notificationsFragment, "Notifications")
+        adapter.addFragment(messagesFragment, "Messages")
     }
 
     private fun setBottomNavListener() {
         bottomNavView.setOnNavigationItemSelectedListener { menuItem ->
             when (menuItem.itemId) {
                 R.id.navigation_home -> {
-                    if (activeFragment == homeFragment) homeFragment.loadUrl()
-                    else {
-                        fragmentManager.beginTransaction().hide(activeFragment).show(homeFragment).commit()
-                        activeFragment = homeFragment
-                    }
+                    if (viewPager.currentItem == positionHome) homeFragment.loadUrl()
+                    else viewPager.setCurrentItem(positionHome, false)
                     true
                 }
                 R.id.navigation_search -> {
-                    if (activeFragment == searchFragment) searchFragment.loadUrl()
-                    else {
-                        fragmentManager.beginTransaction().hide(activeFragment).show(searchFragment).commit()
-                        activeFragment = searchFragment
-                    }
+                    if (viewPager.currentItem == positionSearch) searchFragment.loadUrl()
+                    else viewPager.setCurrentItem(positionSearch, false)
                     true
                 }
                 R.id.navigation_notifications -> {
-                    if (activeFragment == notificationsFragment) notificationsFragment.loadUrl()
-                    else {
-                        fragmentManager.beginTransaction().hide(activeFragment).show(notificationsFragment).commit()
-                        activeFragment = notificationsFragment
-                    }
+                    if (viewPager.currentItem == positionNotification) notificationsFragment.loadUrl()
+                    else viewPager.setCurrentItem(positionNotification, false)
                     true
                 }
                 R.id.navigation_messages -> {
-                    if (activeFragment == messagesFragment) messagesFragment.loadUrl()
-                    else {
-                        fragmentManager.beginTransaction().hide(activeFragment).show(messagesFragment).commit()
-                        activeFragment = messagesFragment
-                    }
+                    if (viewPager.currentItem == positionMessage) messagesFragment.loadUrl()
+                    else viewPager.setCurrentItem(positionMessage, false)
                     true
                 }
                 else -> false
@@ -323,5 +316,35 @@ class MainActivity : AppCompatActivity() {
         filePath!!.onReceiveValue(results.toTypedArray())
         filePath = null
         results.clear()
+    }
+
+    class ViewPagerAdapter(supportFragmentManager: FragmentManager) : FragmentPagerAdapter(supportFragmentManager) {
+
+        // objects of arraylist. One is of Fragment type and
+        // another one is of String type.*/
+        private var fragmentList1: ArrayList<Fragment> = ArrayList()
+        private var fragmentTitleList1: ArrayList<String> = ArrayList()
+
+        // returns which item is selected from arraylist of fragments.
+        override fun getItem(position: Int): Fragment {
+            return fragmentList1.get(position)
+        }
+
+        // returns which item is selected from arraylist of titles.
+        @Nullable
+        override fun getPageTitle(position: Int): CharSequence {
+            return fragmentTitleList1.get(position)
+        }
+
+        // returns the number of items present in arraylist.
+        override fun getCount(): Int {
+            return fragmentList1.size
+        }
+
+        // this function adds the fragment and title in 2 separate  arraylist.
+        fun addFragment(fragment: Fragment, title: String) {
+            fragmentList1.add(fragment)
+            fragmentTitleList1.add(title)
+        }
     }
 }
