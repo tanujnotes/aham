@@ -1,15 +1,14 @@
 <resources>
-    <string name="app_name">aham</string>
+    <string name="app_name">Aham</string>
 
     <string name="title_home">Home</string>
     <string name="title_search">Search</string>
     <string name="title_notifications">Notifications</string>
     <string name="title_messages">Messages</string>
 
-    <string name="enter_your_twitter_username">Enter your twitter username</string>
+    <string name="enter_your_twitter_username">Your twitter username</string>
     <string name="next">Next</string>
     <string name="instructions">Things to remember:
         \n\n1. After logging in, double tap on tabs to refresh. Or just restart the app.
         \n\n2. For Twitter settings, open messages and tap on your picture on the top left.</string>
-    <string name="hashtag_aham">#aham</string>
 </resources>
