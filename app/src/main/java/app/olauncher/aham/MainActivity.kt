@@ -223,6 +223,7 @@ class MainActivity : AppCompatActivity() {
                     }
                     url.contains("twitter.com/compose")
                             or url.contains("twitter.com/i/display")
+                            or url.contains("twitter.com/settings/profile")
                             or url.contains("ads.twitter.com")
                             or url.contains("analytics.twitter.com")
                             or (url.contains("twitter.com")
