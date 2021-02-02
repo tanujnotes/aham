@@ -4,7 +4,7 @@
 
         <!-- Primary brand color. -->
         <item name="colorPrimary">@color/twitter_primary</item>
-        <item name="colorPrimaryVariant">@color/twitter_primary_dark</item>
+        <item name="colorPrimaryVariant">@color/twitter_dark_gray</item>
         <item name="colorOnPrimary">@color/white</item>
 
         <!-- Secondary brand color. -->
@@ -12,6 +12,7 @@
         <item name="colorSecondaryVariant">@color/twitter_primary_dark</item>
         <item name="colorOnSecondary">@color/black</item>
 
+        <item name="android:windowLightStatusBar">false</item>
         <item name="android:statusBarColor">?attr/colorPrimaryVariant</item>
         <item name="android:navigationBarColor">?attr/colorPrimaryVariant</item>
     </style>
