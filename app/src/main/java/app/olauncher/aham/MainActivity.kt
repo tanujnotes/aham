@@ -82,7 +82,6 @@ class MainActivity : AppCompatActivity() {
         addFragments(adapter)
         viewPager.offscreenPageLimit = 3
         viewPager.adapter = adapter
-        viewPager.setOnTouchListener { _, _ -> true }
 
         handleIntent(intent)
 
